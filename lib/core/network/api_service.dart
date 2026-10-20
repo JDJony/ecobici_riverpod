@@ -1,23 +1,35 @@
+import 'dart:developer' as developer;
+
 import 'package:dio/dio.dart';
 
 class APIService {
-  final Dio _dio = Dio();
-
-  bool isProduction = false;
-
-  APIService() {
+  APIService({Dio? dio}) : _dio = dio ?? Dio() {
     _dio.interceptors.add(
-      LoggerInterceptor(request: !isProduction, response: !isProduction, error: !isProduction)
+      LoggerInterceptor(
+        request: !isProduction,
+        response: !isProduction,
+        error: !isProduction,
+      ),
     );
   }
 
-  Future<Response> post(String endPoint, Map<String, dynamic> data) => _dio.post(endPoint, data: data);
+  final Dio _dio;
+  bool isProduction = false;
 
-  Future<Response> get(String endPoint, {Options? options}) => _dio.get(endPoint, options: options);
+  Future<Response<dynamic>> post(String endPoint, Map<String, dynamic> data) {
+    return _dio.post(endPoint, data: data);
+  }
 
+  Future<Response<dynamic>> get(String endPoint, {Options? options}) {
+    return _dio.get(endPoint, options: options);
+  }
+
+  void dispose() {
+    _dio.close();
+  }
 }
 
-class LoggerInterceptor extends Interceptor  {
+class LoggerInterceptor extends Interceptor {
   LoggerInterceptor({
     this.request = true,
     this.response = true,
@@ -31,7 +43,7 @@ class LoggerInterceptor extends Interceptor  {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (request) {
-      print('Request: ${options.method} ${options.path}');
+      developer.log('${options.method} ${options.uri}', name: 'APIService');
     }
     super.onRequest(options, handler);
   }
@@ -39,17 +51,22 @@ class LoggerInterceptor extends Interceptor  {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (this.response) {
-      print('Response: ${response.statusCode} ${response.requestOptions.path}');
+      developer.log(
+        '${response.statusCode} ${response.requestOptions.uri}',
+        name: 'APIService',
+      );
     }
     super.onResponse(response, handler);
   }
 
   @override
-  void onError(DioError err, ErrorInterceptorHandler handler) {
+  void onError(DioException err, ErrorInterceptorHandler handler) {
     if (error) {
-      print('Error: ${err.message} ${err.requestOptions.path}');
+      developer.log(
+        '${err.message} ${err.requestOptions.uri}',
+        name: 'APIService',
+      );
     }
     super.onError(err, handler);
   }
-
 }

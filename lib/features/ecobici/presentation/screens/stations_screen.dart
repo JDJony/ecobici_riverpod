@@ -10,6 +10,8 @@ class StationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stations = ref.watch(stationsProvider);
+    final listProduct = ref.watch(listProductProvider);
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -22,7 +24,7 @@ class StationsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: stations.when(
+      /*body: stations.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => Center(
           child: TextButton.icon(
@@ -52,6 +54,37 @@ class StationsScreen extends ConsumerWidget {
                   'station-detail',
                   pathParameters: {'stationId': station.id},
                 ),
+              );
+            },
+          );
+        },
+      ),*/
+      body: listProduct.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(
+          child: TextButton.icon(
+            onPressed: () => ref.invalidate(listProductProvider),
+            icon: const Icon(Icons.refresh),
+            label: const Text('No se pudieron cargar los productos. Reintentar'),
+          ),
+        ),
+        data: (items) {
+          if (items.isEmpty) {
+            return const Center(child: Text('No hay productos disponibles.'));
+          }
+
+          return ListView.separated(
+            itemCount: items.length,
+            separatorBuilder: (context, index) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final product = items[index];
+              return ListTile(
+                leading: const Icon(Icons.shopping_cart),
+                title: Text(product.title),
+                subtitle: Text(
+                  '\$${product.price}',
+                ),
+                trailing: const Icon(Icons.chevron_right),
               );
             },
           );

@@ -18,6 +18,16 @@ class StationsView extends ConsumerWidget {
         title: const Text('Estaciones del Metro'),
         actions: [
           IconButton(
+            tooltip: 'Perfil',
+            onPressed: () => context.pushNamed('profile'),
+            icon: const Icon(Icons.person_outline),
+          ),
+          IconButton(
+            tooltip: 'Cambiar tema',
+            onPressed: () => context.goNamed('theme'),
+            icon: const Icon(Icons.palette_outlined),
+          ),
+          IconButton(
             tooltip: 'Actualizar estaciones',
             onPressed: () =>
                 ref.read(stationsViewModelProvider.notifier).refresh(),
